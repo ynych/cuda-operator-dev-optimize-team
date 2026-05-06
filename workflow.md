@@ -4,7 +4,7 @@
 
 1. 对照 [reference-ecosystem.md](reference-ecosystem.md)：GEMM/卷积/规约等是否可由 **cuBLAS / CUTLASS / cuDNN / CUB** 承担。  
 2. **目标模型族**（默认 **Qwen / DeepSeek**）：对照 [reference-target-models.md](reference-target-models.md) 中的算子条目、MoE、量化与精度默认；非默认模型族由用户在 Pre-flight 确认。  
-3. 推理/LLM 类需求：主动检索 **vLLM**、**TensorRT-LLM**、**SGLang**、**FlashAttention**、**FlashInfer**、**Triton / Inductor**、**DeepSeek 官方子仓**（如 DeepGEMM、DeepSeek-V3）等中的 **同类算子目录与绑定方式**，在设计中写明「参考路径」，减少重复造轮。  
+3. 推理/LLM 类需求：主动检索 **vLLM**、**TensorRT-LLM**、**SGLang**、**FlashAttention**、**FlashInfer**、**Triton / Inductor**、**Transformer Engine**、**Apex**、**llm-compressor**、**AWQ / GPTQ / SmoothQuant**、**DeepSeek 官方子仓**（如 DeepGEMM、DeepSeek-V3）等中的 **同类算子目录与绑定方式**；若走 **CUDA Graph**，对照 NVIDIA / PyTorch 文档与设计中的 capture 约束。在设计中写明「参考路径」，减少重复造轮。  
 4. 仅当库无法覆盖（特殊融合、layout、数值路径）时，再进入完整手写 kernel 的 tiling 设计。
 
 ## Overview

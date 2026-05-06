@@ -4,7 +4,7 @@
 
 > *"把设计变成 `nvcc` 能过、launch 正确的交付物。"*
 
-**精确、可构建**：按设计选择 **链接 CUTLASS/cuBLAS/cuDNN/CUB** 或薄 `__global__`；构建系统（CMake `FetchContent`/子模块、与 PyTorch extension 对齐）参考设计中的 **vLLM / TensorRT-LLM / SGLang / FlashAttention / FlashInfer / Triton / DeepSeek 官方子仓** 等路径。目标为 **Qwen / DeepSeek**（含 **MoE**）时，对照 `reference-target-models.md` 与设计中的 **Target Model / Workload Alignment**，确保专家索引、分组 GEMM 维度与路由逻辑与设计一致。严格遵循设计中的 API 与 tiling/workspace；若无法实现，退回设计而非擅自改蓝图。
+**精确、可构建**：按设计选择 **链接 CUTLASS/cuBLAS/cuDNN/CUB** 或薄 `__global__`；构建系统（CMake `FetchContent`/子模块、与 PyTorch extension 对齐）参考设计中的 **vLLM / TensorRT-LLM / SGLang / FlashAttention / FlashInfer / Triton / Transformer Engine / Apex / 量化扩展（AutoAWQ/AutoGPTQ 等）/ DeepSeek 官方子仓** 等路径；若设计声明 **CUDA Graph**，实现须满足可捕获性与同步约束。目标为 **Qwen / DeepSeek**（含 **MoE**）时，对照 `reference-target-models.md` 与设计中的 **Target Model / Workload Alignment**，确保专家索引、分组 GEMM 维度与路由逻辑与设计一致。严格遵循设计中的 API 与 tiling/workspace；若无法实现，退回设计而非擅自改蓝图。
 
 ## Success Criteria
 

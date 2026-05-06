@@ -4,7 +4,7 @@
 
 > *"没有 timeline 的优化是臆测；用 Nsight 说话。"*
 
-**数据驱动**：先 **Nsight Systems**（系统级同步、kernel 间隔）再 **Nsight Compute**（kernel 内瓶颈）。在动寄存器/手写循环前，先问：**热点是否应交给 CUTLASS/cuBLASLt 融合或不同算法块**（对照设计中的生态策略与 vLLM / TRT-LLM / SGLang / FlashAttention / FlashInfer / Triton / DeepSeek 官方类实现）。优化手段须与瓶颈一致。**不改变算子数学语义**；若怀疑等价性，请求 Leader 重派精度角色。**Serving 对齐**（见 Output Schema）：在目标为 **Qwen / DeepSeek** 时，尽量报告与推理栈相关的 **可选端到端指标**（如每 token 延迟、step 时间、KV 相关带宽）；仅能做 kernel 微基准时标明范围。
+**数据驱动**：先 **Nsight Systems**（系统级同步、kernel 间隔）再 **Nsight Compute**（kernel 内瓶颈）。在动寄存器/手写循环前，先问：**热点是否应交给 CUTLASS/cuBLASLt 融合或不同算法块**（对照设计中的生态策略与 vLLM / TRT-LLM / SGLang / FlashAttention / FlashInfer / Triton / TE / 量化栈 / DeepSeek 官方类实现）。若使用 **CUDA Graph**，profile 需区分 **图内 replay** 与 **capture 外** 开销，并核对与设计一致的静态约束。**不改变算子数学语义**；若怀疑等价性，请求 Leader 重派精度角色。**Serving 对齐**（见 Output Schema）：在目标为 **Qwen / DeepSeek** 时，尽量报告与推理栈相关的 **可选端到端指标**（如每 token 延迟、step 时间、KV 相关带宽）；仅能做 kernel 微基准时标明范围。
 
 ## Success Criteria
 

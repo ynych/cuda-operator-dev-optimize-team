@@ -61,8 +61,12 @@
 | 路径 | 设计注意 | 精度 golden | 性能注意 |
 |------|----------|-------------|----------|
 | bf16 / fp16 | 与训练对齐的累加顺序说明 | PyTorch ref 同 dtype；注意 `float32` acc 选项 | NCU 看 memory vs compute |
-| FP8 (E4M3/E5M2 等) | 缩放、amax、与框架约定一致 | 需 **框架或 TRT-LLM / DeepGEMM 部署侧一致** 的 ref；atol/rtol 单独论证 | 对照 cuBLASLt FP8 API、TRT-LLM FP8 插件、**DeepGEMM** |
-| INT8 / weight-only | 校准表、per-channel vs per-tensor | 与部署栈同一套 scale | 带宽与指令吞吐 |
+| FP8 (E4M3/E5M2 等) | 缩放、amax；与 **Transformer Engine** / 框架 TE 模块约定一致 | 需 **TE / TRT-LLM / DeepGEMM** 等与线上一致的 ref；atol/rtol 单独论证 | 对照 TE、cublasLt FP8、TRT-LLM、**DeepGEMM** |
+| INT8 / SmoothQuant 等 | **平滑因子**、per-tensor/channel；与 GEMM 融合顺序 | 与 **SmoothQuant** 或部署导出一致 | 带宽、融合 epilogue |
+| W4A16 / AWQ / GPTQ | 权重量化格式、**scale 与打包 layout**；对照 **AutoAWQ / AutoGPTQ** 内核 | 与 **AWQ/GPTQ 推理栈** 同一 ref，禁止 fp32 强行 allclose | GEMV/GEMM、decode 批量 |
+| llm-compressor 导出 | 与 **vLLM / TRT-LLM** 等目标引擎的 **checkpoint 与算子映射** | 以目标 serving 的 golden 为准 | 压缩后图与 **CUDA Graph** 捕获边界 |
+
+**参考仓库索引**（算法与实现对照）：见 [reference-ecosystem.md](reference-ecosystem.md) 中 **Transformer Engine、Apex、AWQ、AutoAWQ、GPTQ、AutoGPTQ、SmoothQuant、llm-compressor** 及 **CUDA Graph** 小节。
 
 **禁止**：在未更新设计的前提下，以「提速」为由更换量化scheme或缩放策略。
 
