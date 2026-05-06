@@ -3,8 +3,9 @@
 ## 生态优先（Stage 1 之前牢记）
 
 1. 对照 [reference-ecosystem.md](reference-ecosystem.md)：GEMM/卷积/规约等是否可由 **cuBLAS / CUTLASS / cuDNN / CUB** 承担。  
-2. 推理/LLM 类需求：主动检索 **vLLM**、**TensorRT-LLM**（及 FlashAttention 等）中 **同类算子的目录与绑定方式**，在设计中写明「参考路径」，减少重复造轮。  
-3. 仅当库无法覆盖（特殊融合、layout、数值路径）时，再进入完整手写 kernel 的 tiling 设计。
+2. **目标模型族**（默认 **Qwen / DeepSeek**）：对照 [reference-target-models.md](reference-target-models.md) 中的算子条目、MoE、量化与精度默认；非默认模型族由用户在 Pre-flight 确认。  
+3. 推理/LLM 类需求：主动检索 **vLLM**、**TensorRT-LLM**（及 FlashAttention 等）中 **同类算子的目录与绑定方式**，在设计中写明「参考路径」，减少重复造轮。  
+4. 仅当库无法覆盖（特殊融合、layout、数值路径）时，再进入完整手写 kernel 的 tiling 设计。
 
 ## Overview
 
@@ -46,7 +47,7 @@ graph TD
 | Step | Executor | Gate |
 |------|-----------|------|
 | 0 | Leader | User go/no-go on missing deps |
-| 1 | operator-designer | 含 **Ecosystem Strategy** 等必选小节 → DESIGN-COMPLETE |
+| 1 | operator-designer | 含 **Ecosystem Strategy**、**Target Model / Workload Alignment** 等必选小节 → DESIGN-COMPLETE |
 | 2 | kernel-coder | nvcc/link SUCCESS |
 | 3 | code-adversary | LOW-RISK / ACCEPTABLE-RISK |
 | 4 | precision-validator | PRECISION-PASS |
@@ -59,10 +60,12 @@ graph TD
 # CUDA Operator Dev & Optimize Report
 
 ## Summary
-[算子名、dtype、精度结论、性能结论]
+[算子名、目标模型族、dtype、精度结论、性能结论]
 
 ## Stage 1: Design
 - Verdict: DESIGN-COMPLETE / ...
+- Target model / workload: [Qwen / DeepSeek / both / other + 型号或配置摘要]
+- Shape & precision path: [hidden, heads, seq/MoE 参数, bf16/fp8/量化等]
 - Ecosystem: [cuBLAS / CUTLASS / cuDNN / CUB / raw kernel / mixed + 理由]
 - Reference repos: [e.g. vLLM / TensorRT-LLM paths reviewed]
 - Tiling: [grid/block/tile, or N/A if library-only]
@@ -87,6 +90,7 @@ graph TD
 - Verdict: PERFORMANCE-TARGET-MET / IMPROVED / NO-GAIN
 - Baseline vs opt: [kernel time or achieved BW]
 - Metrics: [occupancy, mem throughput, NCU section if any]
+- Serving alignment: [纯 kernel 指标 / 可选：每 token、端到端 step、KV 带宽等 — 若无法测量则注明 N/A 与原因]
 
 ## Gate History
 [各 gate pass/fail + retries]

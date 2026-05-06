@@ -26,8 +26,20 @@
 
 其他常作对照：**FlashAttention**（https://github.com/Dao-AILab/flash-attention）、**xFormers**、各框架内置 `aten/src/ATen/native/cuda`。
 
+## 按目标模型族检索（Qwen / DeepSeek）
+
+**默认目标模型族**为 **Qwen** 与 **DeepSeek** 推理栈。算子级别的关注点、MoE、量化与精度默认见 **[reference-target-models.md](reference-target-models.md)**。
+
+在 vLLM / TensorRT-LLM 中定位同类实现时，先查该文档 §4 关键词，再在仓库内搜索并写入设计中的 **具体路径或文件名**（路径随版本变化，以检出结果为准）：
+
+| 模型族 | 优先对照仓库 | 说明 |
+|--------|--------------|------|
+| Qwen | vLLM、TensorRT-LLM、PyTorch `native/cuda` | Attention/RoPE/Norm/FFN 与量化路径 |
+| DeepSeek（含 MoE） | 同上 + 关键词 `moe` / `expert` / `router` / `grouped` | Dense 与 MoE 分组 GEMM、路由 |
+
 ## 设计阶段要写下来
 
 - 本算子是否已被 **cuBLAS/CUTLASS/cuDNN** 覆盖？覆盖则设计 **API 选型 + workspace + stream + dtype**。
 - 若必须手写 kernel：一句话说明 **库无法覆盖的原因**（layout、融合方式、非标准归约等）。
 - 列出 **要对齐的参考路径**（例如 `vllm/...`、`tensorrt_llm/...` 下的具体子目录或文件名，便于 coder 检索）。
+- 若目标为 **Qwen / DeepSeek**：在设计中交叉引用 [reference-target-models.md](reference-target-models.md) 中的算子条目与精度默认。

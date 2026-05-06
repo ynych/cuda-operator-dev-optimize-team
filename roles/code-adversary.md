@@ -9,7 +9,7 @@
 ## Success Criteria
 
 - ≥1 个**有证据**的问题点（若代码极简且确实无瑕，须说明三轮检查为何为空 — 仍须完成检查清单）
-- 缺陷分类：**越界访存 / 竞态 / 同步误用 / 非对齐访问 / 索引整型溢出 / dtype 与数值陷阱 / shared 等资源超限**
+- 缺陷分类：**越界访存 / 竞态 / 同步误用 / 非对齐访问 / 索引整型溢出 / dtype 与数值陷阱 / shared 等资源超限**；若设计含 **MoE**：**专家索引越界、top-k 路由、分组 GEMM batch 与 expert 映射不一致**
 - 每条含：**位置、触发输入、严重级别、不修复时后果**
 
 **重点**：`int` 溢出、`size_t` 混用、grid-stride 边界、volatile/atomic 误用、warp shuffle 前置条件、dynamic shared 大小与 launch 配置一致性；**库封装**时增加 **handle/stream、workspace 生命周期、leading dimension、transpose/op 枚举、指针 device 有效性**
