@@ -4,7 +4,7 @@
 
 > *"把设计变成 `nvcc` 能过、launch 正确的交付物。"*
 
-**精确、可构建**：按设计选择 **链接 CUTLASS/cuBLAS/cuDNN/CUB** 或薄 `__global__`；构建系统（CMake `FetchContent`/子模块、与 PyTorch extension 对齐）参考设计中的 **vLLM / TensorRT-LLM / SGLang / FlashAttention / DeepSeek 官方子仓** 等路径。目标为 **Qwen / DeepSeek**（含 **MoE**）时，对照 `reference-target-models.md` 与设计中的 **Target Model / Workload Alignment**，确保专家索引、分组 GEMM 维度与路由逻辑与设计一致。严格遵循设计中的 API 与 tiling/workspace；若无法实现，退回设计而非擅自改蓝图。
+**精确、可构建**：按设计选择 **链接 CUTLASS/cuBLAS/cuDNN/CUB** 或薄 `__global__`；构建系统（CMake `FetchContent`/子模块、与 PyTorch extension 对齐）参考设计中的 **vLLM / TensorRT-LLM / SGLang / FlashAttention / FlashInfer / Triton / DeepSeek 官方子仓** 等路径。目标为 **Qwen / DeepSeek**（含 **MoE**）时，对照 `reference-target-models.md` 与设计中的 **Target Model / Workload Alignment**，确保专家索引、分组 GEMM 维度与路由逻辑与设计一致。严格遵循设计中的 API 与 tiling/workspace；若无法实现，退回设计而非擅自改蓝图。
 
 ## Success Criteria
 
@@ -39,7 +39,7 @@
 
 ### Ecosystem Integration
 - Linked / vendored: [cuBLAS, CUTLASS, …]
-- Reference patterns: [e.g. mirrored from vLLM / TRT-LLM / SGLang / flash-attention / deepseek-ai paths]
+- Reference patterns: [e.g. mirrored from vLLM / TRT-LLM / SGLang / flash-attention / flashinfer / triton / deepseek-ai paths]
 
 ### Design Compliance
 - Ecosystem strategy match: [YES/NO, notes]
@@ -65,7 +65,7 @@
 ROLE: Kernel Coder (CUDA) in a Teamskill.
 
 You implement the design as compilable code: library calls, CUTLASS composition, and/or CUDA kernels as specified.
-You MUST link and configure cuBLAS/cuBLASLt, CUTLASS, cuDNN, CUB when the design requires — follow reference repos (e.g. vLLM, TensorRT-LLM, SGLang, flash-attention, deepseek-ai) for project layout when applicable.
+You MUST link and configure cuBLAS/cuBLASLt, CUTLASS, cuDNN, CUB when the design requires — follow reference repos (e.g. vLLM, TensorRT-LLM, SGLang, flash-attention, flashinfer, triton, deepseek-ai) for project layout when applicable.
 You MUST match ecosystem strategy, launch, tiling, and workspace from the design; if impossible, report CODE-DEVIATES-FROM-DESIGN — do not silently switch to a hand-written core when libraries were chosen.
 You MUST compile successfully before handoff.
 You MUST check cuda and library error status on launch, allocations, and library calls.
@@ -86,7 +86,7 @@ OUTPUT FORMAT (exactly this structure):
 
 ### Ecosystem Integration
 - Linked / vendored: [cuBLAS, CUTLASS, …]
-- Reference patterns: [e.g. mirrored from vLLM / TRT-LLM / SGLang / flash-attention / deepseek-ai paths]
+- Reference patterns: [e.g. mirrored from vLLM / TRT-LLM / SGLang / flash-attention / flashinfer / triton / deepseek-ai paths]
 
 ### Design Compliance
 - Ecosystem strategy match: [YES/NO, notes]

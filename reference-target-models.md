@@ -10,12 +10,12 @@
 
 | 关注点 | 数学/结构角色 | 库与实现倾向 |
 |--------|----------------|--------------|
-| 注意力 | MHA/MQA/GQA、scale、mask、softmax | **FlashAttention** 系融合；vLLM PagedAttention；SGLang RadixAttention / backend；TRT-LLM MHA 插件；CUTLASS/cuBLAS 作 GEMM 块 |
+| 注意力 | MHA/MQA/GQA、scale、mask、softmax | **FlashAttention** 系融合；**FlashInfer** 推理侧 attention/page 类 kernel；vLLM PagedAttention；SGLang RadixAttention / backend；TRT-LLM MHA 插件；CUTLASS/cuBLAS 作 GEMM 块 |
 | RoPE | 位置嵌入与 cache 布局 | 与 KV layout、head 维对齐；对照框架 `native` 与 vLLM / SGLang / TRT-LLM 中 rope 相关实现 |
 | RMSNorm / LayerNorm | 稳定归一 | cuDNN 或融合 kernel；手写时注意规约与数值 |
 | FFN / SwiGLU | 门控前馈 | GEMM + 激活融合 → CUTLASS epilogue / cuBLASLt |
 | 嵌入 / LM head | 大 vocab GEMM | cuBLASLt batched GEMM；量化时走量化 GEMM 路径 |
-| KV Cache | layout、page、copy | vLLM `attention`/`cache`；SGLang 中 cache / attention backend；TRT-LLM KV 插件 |
+| KV Cache | layout、page、copy | vLLM `attention`/`cache`；SGLang 中 cache / attention backend；**FlashInfer** page/KV 相关实现；TRT-LLM KV 插件 |
 
 详细库优先级见 [reference-ecosystem.md](reference-ecosystem.md)。
 
@@ -36,7 +36,7 @@
   - **路由**：top-k 专家选择、负载均衡相关的数值与稳定性（非性能优化不得改语义）。
   - **分组 GEMM**：多专家 batched GEMM / 稀疏聚集 → **cuBLASLt grouped GEMM / CUTLASS grouped** 优先于手写分块全家桶。
   - **通信与重叠**：若跨卡，性能阶段需区分 **纯 kernel 时间** 与 **端到端 step**（见 `roles/performance-optimizer.md` Serving 对齐）。
-- **设计必选**：是否 MoE、`num_experts`、top-k、per-layer 专家映射；参考实现关键词 **MoE、expert、router、grouped GEMM** 在 vLLM / TensorRT-LLM / SGLang / **deepseek-ai（DeepSeek-V3 等）** 仓库内交叉检索；FP8 GEMM 等可对照 **DeepGEMM**。
+- **设计必选**：是否 MoE、`num_experts`、top-k、per-layer 专家映射；参考实现关键词 **MoE、expert、router、grouped GEMM** 在 vLLM / TensorRT-LLM / SGLang / **FlashInfer** / **deepseek-ai（DeepSeek-V3 等）** 仓库内交叉检索；FP8 GEMM 等可对照 **DeepGEMM**。
 
 ---
 
@@ -44,13 +44,13 @@
 
 版本迭代会导致路径变动，编码前在仓库内 **按关键词搜索** 并对照设计中的「参考路径」：
 
-| 主题 | vLLM | TensorRT-LLM | SGLang | FlashAttention | DeepSeek 官方（示例） |
-|------|------|--------------|--------|----------------|----------------------|
-| 注意力 / KV | `attention`, `paged`, `kv_cache` | `attention`, `kv`, `context` | `attention`, `radix`, `kv`, `backend` | `flash_attn`, `cuda`, `src` | `inference`, `model`, `attention`（按子仓调整） |
-| RoPE | `rotary`, `rope` | `rotary`, `rope` | `rope`, `rotary` | （多在集成侧） | `rope`, `embed` |
-| LayerNorm / RMSNorm | `layernorm`, `rms` | `rmsnorm`, `norm` | `norm`, `layernorm` | — | `norm`, `rms` |
-| MoE | `moe`, `expert`, `router` | `moe`, `expert`, `router` | `moe`, `expert` | — | `moe`, `expert`, `MoE` |
-| 量化 / GEMM | `fp8`, `quant`, `awq`, `gptq` | `quantize`, `fp8`, `weight_only` | `fp8`, `quant`, `gemm` | — | **DeepGEMM**：`gemm`, `fp8`, `mma` |
+| 主题 | vLLM | TensorRT-LLM | SGLang | FlashAttention | FlashInfer | DeepSeek 官方（示例） |
+|------|------|--------------|--------|----------------|------------|----------------------|
+| 注意力 / KV | `attention`, `paged`, `kv_cache` | `attention`, `kv`, `context` | `attention`, `radix`, `kv`, `backend` | `flash_attn`, `cuda`, `src` | `page`, `decode`, `prefill`, `batch_attention` | `inference`, `model`, `attention`（按子仓调整） |
+| RoPE | `rotary`, `rope` | `rotary`, `rope` | `rope`, `rotary` | （多在集成侧） | `rope`, `pos_enc` | `rope`, `embed` |
+| LayerNorm / RMSNorm | `layernorm`, `rms` | `rmsnorm`, `norm` | `norm`, `layernorm` | — | `norm`, `rms` | `norm`, `rms` |
+| MoE | `moe`, `expert`, `router` | `moe`, `expert`, `router` | `moe`, `expert` | — | （按版本检索） | `moe`, `expert`, `MoE` |
+| 量化 / GEMM | `fp8`, `quant`, `awq`, `gptq` | `quantize`, `fp8`, `weight_only` | `fp8`, `quant`, `gemm` | — | `fp8`, `gemm`, `quant` | **DeepGEMM**：`gemm`, `fp8`, `mma` |
 
 索引总表见 [reference-ecosystem.md](reference-ecosystem.md)「按目标模型族」一节。
 

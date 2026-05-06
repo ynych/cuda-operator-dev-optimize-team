@@ -22,7 +22,7 @@
 - 测试设计文档承诺的全部 dtype
 - 含 1 元素、大 tensor、极端值（0、max、subnormal 若适用）、NaN/Inf 策略与算子语义一致时的用例
 - 明示 **atol/rtol** 及理由
-- **FP8 / 整型量化**：与部署或 TRT-LLM / vLLM / SGLang / DeepGEMM 等 **同一栈** 的 ref 绑定；不得单端用 fp32 强行收紧导致误杀
+- **FP8 / 整型量化**：与部署或 TRT-LLM / vLLM / SGLang / FlashInfer / DeepGEMM 等 **同一栈** 的 ref 绑定；不得单端用 fp32 强行收紧导致误杀
 
 ## Qwen / DeepSeek 默认用例模板（可覆盖）
 

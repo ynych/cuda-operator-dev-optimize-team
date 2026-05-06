@@ -2,7 +2,7 @@
 
 ## 项目定位
 
-本仓库是一个 **团队型 Agent Skill（team-skill）**，用于在编排环境中驱动 **CUDA 自定义算子 / kernel** 的端到端交付：**设计 → 实现 → 对抗审查 → 精度验收 → 性能 profile**，并强制 **「NVIDIA 生态与开源参考优先」**（cuBLAS / cuBLASLt、CUTLASS、cuDNN、CUB 与 **vLLM、TensorRT-LLM、SGLang、FlashAttention、DeepSeek 官方开源** 等范式），避免无必要地从零手写核心算子。
+本仓库是一个 **团队型 Agent Skill（team-skill）**，用于在编排环境中驱动 **CUDA 自定义算子 / kernel** 的端到端交付：**设计 → 实现 → 对抗审查 → 精度验收 → 性能 profile**，并强制 **「NVIDIA 生态与开源参考优先」**（cuBLAS / cuBLASLt、CUTLASS、cuDNN、CUB 与 **vLLM、TensorRT-LLM、SGLang、FlashAttention、FlashInfer、Triton、DeepSeek 官方开源** 等范式），避免无必要地从零手写核心算子。
 
 **默认目标工作负载**：以 **Qwen 系列** 与 **DeepSeek 系列** 大模型的推理（及相关的训练/对齐算子）为主。算子需求应优先与这两条模型线的 **典型结构（Attention、RoPE、RMSNorm、SwiGLU、MoE 等）**、**精度路径（bf16 / fp8 / 量化）** 对齐；其他模型族需在 Pre-flight 中显式声明或切换上下文。
 
@@ -24,7 +24,7 @@
 | [workflow.md](workflow.md) | 步骤、Mermaid、Final Report 模板 |
 | [bind.md](bind.md) | 预算、行为约束、降级 |
 | [dependencies.yaml](dependencies.yaml) | 工具与子 skill 预检 |
-| [reference-ecosystem.md](reference-ecosystem.md) | NVIDIA 栈与 vLLM / TRT-LLM / SGLang / FlashAttention / DeepSeek 官方等参考优先级 |
+| [reference-ecosystem.md](reference-ecosystem.md) | NVIDIA 栈与 vLLM / TRT-LLM / SGLang / FlashAttention / FlashInfer / Triton / DeepSeek 官方等参考优先级 |
 | [reference-target-models.md](reference-target-models.md) | **Qwen / DeepSeek** 算子关注点、MoE、量化与精度默认 |
 | [roles/](roles/) | 五角色：设计、编码、对抗、精度、性能 |
 

@@ -1,13 +1,13 @@
 ---
 name: cuda-operator-dev-optimize-team
 description: |
-  5-role C+A pipeline for CUDA ops: prefer CUTLASS, cuBLAS, cuDNN, CUB before raw kernels; cites vLLM, TensorRT-LLM, SGLang, FlashAttention, and deepseek-ai (e.g. DeepGEMM) as reference patterns.
+  5-role C+A pipeline for CUDA ops: prefer CUTLASS, cuBLAS, cuDNN, CUB before raw kernels; cites vLLM, TensorRT-LLM, SGLang, FlashAttention, FlashInfer, Triton, and deepseek-ai (e.g. DeepGEMM) as reference patterns.
   Default target workloads: Qwen and DeepSeek LLM serving (see reference-target-models.md). Use for end-to-end custom CUDA from spec to correct, profiled code. Not for trivial one-offs without QA gates.
 version: "0.2"
 kind: team-skill
 roles:
   - id: operator-designer
-    purpose: Ecosystem-first plan (cuBLAS/CUTLASS/cuDNN/CUB), then grid/tile/memory or library workspace; references vLLM, TensorRT-LLM, SGLang, FlashAttention, DeepSeek official repos when relevant.
+    purpose: Ecosystem-first plan (cuBLAS/CUTLASS/cuDNN/CUB), then grid/tile/memory or library workspace; references vLLM, TensorRT-LLM, SGLang, FlashAttention, FlashInfer, Triton, DeepSeek official repos when relevant.
     skills: [cuda-kernel-design]
     tools: []
   - id: kernel-coder
@@ -30,7 +30,7 @@ roles:
 
 # CUDA Operator Dev & Optimize Team
 
-面向 **CUDA 自定义算子 / kernel** 的端到端流程：**5 个串行阶段 + Stage 3 对抗式代码审查门（C+A）**。CUDA 生态成熟，**默认「库与开源实现优先」**：在 **cuBLAS / cuBLASLt、CUTLASS、cuDNN、CUB（CCCL）** 等能覆盖的场景，设计应为 **封装与 launch/workspace**，而非从零写核心算子；**vLLM**、**TensorRT-LLM**、**SGLang**、**FlashAttention**、**DeepSeek 官方开源**（如 DeepGEMM、DeepSeek-V3 等）等仓库中的组织方式与融合实现应作为 **对照示例**（见 [reference-ecosystem.md](reference-ecosystem.md)）。**默认优化的目标模型族为 Qwen 与 DeepSeek 推理栈**（算子形状、MoE、量化与验收默认见 [reference-target-models.md](reference-target-models.md)）；其他模型族须在 Pre-flight 中声明。确需手写 `__global__` 时，再在设计中展开 **grid/block/tile、shared/reg、occupancy**，并用 **golden + Nsight** 闭环。
+面向 **CUDA 自定义算子 / kernel** 的端到端流程：**5 个串行阶段 + Stage 3 对抗式代码审查门（C+A）**。CUDA 生态成熟，**默认「库与开源实现优先」**：在 **cuBLAS / cuBLASLt、CUTLASS、cuDNN、CUB（CCCL）** 等能覆盖的场景，设计应为 **封装与 launch/workspace**，而非从零写核心算子；**vLLM**、**TensorRT-LLM**、**SGLang**、**FlashAttention**、**FlashInfer**、**Triton / torch.compile（Inductor）**、**DeepSeek 官方开源**（如 DeepGEMM、DeepSeek-V3 等）等仓库中的组织方式与融合实现应作为 **对照示例**（见 [reference-ecosystem.md](reference-ecosystem.md)）。**默认优化的目标模型族为 Qwen 与 DeepSeek 推理栈**（算子形状、MoE、量化与验收默认见 [reference-target-models.md](reference-target-models.md)）；其他模型族须在 Pre-flight 中声明。确需手写 `__global__` 时，再在设计中展开 **grid/block/tile、shared/reg、occupancy**，并用 **golden + Nsight** 闭环。
 
 ## Workflow
 
@@ -67,6 +67,6 @@ roles:
 | [workflow.md](workflow.md) | Mermaid、步骤、门禁、最终报告模板 |
 | [bind.md](bind.md) | 预算、行为约束、失败降级 |
 | [dependencies.yaml](dependencies.yaml) | 工具与子 skill 清单 |
-| [reference-ecosystem.md](reference-ecosystem.md) | 库优先级与 vLLM / TensorRT-LLM / SGLang / FlashAttention / DeepSeek 官方等参考示例 |
+| [reference-ecosystem.md](reference-ecosystem.md) | 库优先级与 vLLM / TRT-LLM / SGLang / FlashAttention / FlashInfer / Triton 等参考示例 |
 | [reference-target-models.md](reference-target-models.md) | Qwen / DeepSeek 算子关注点、MoE、量化与精度默认 |
 | [README.md](README.md) | 项目定位与文档导航 |
