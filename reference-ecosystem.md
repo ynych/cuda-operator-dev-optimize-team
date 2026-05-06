@@ -17,29 +17,42 @@
 
 ## 开源框架中的实现范式（作示例，非依赖项）
 
-实现 **推理/LLM 相关**算子时，应主动对照下列仓库中的 **目录结构、launch 封装、与 PyTorch 的绑定方式**，避免闭门造车：
+实现 **推理/LLM 相关**算子时，应主动对照下列仓库中的 **目录结构、launch 封装、与 PyTorch 的绑定方式**，避免闭门造车。除 **vLLM**、**TensorRT-LLM** 外，建议将 **SGLang**、**FlashAttention**、**DeepSeek 官方开源** 等纳入检索范围（下列为高频对照入口，版本以各仓库默认分支为准）。
+
+### 推理 / 服务栈
 
 | 项目 | 典型参考价值 | URL |
 |------|----------------|-----|
 | **vLLM** | PagedAttention、KV cache、自定义 CUDA extension 与 Python 绑定组织方式 | https://github.com/vllm-project/vllm |
 | **TensorRT-LLM** | 融合 MHA、GEMM/量化、插件式 kernel 与构建系统集成 | https://github.com/NVIDIA/TensorRT-LLM |
+| **SGLang** | 高吞吐推理服务、RadixAttention、调度与 **backend / custom op** 组织方式；与 FlashInfer 等组件的结合方式 | https://github.com/sgl-project/sglang |
 
-其他常作对照：**FlashAttention**（https://github.com/Dao-AILab/flash-attention）、**xFormers**、各框架内置 `aten/src/ATen/native/cuda`。
+### 融合注意力与高性能 Kernel（影响力大、常作黄金参考）
+
+| 项目 | 典型参考价值 | URL |
+|------|----------------|-----|
+| **FlashAttention**（含 FA2/FA3 演进） | IO-aware 融合注意力、tiling 与内核组织；自定义算子如何与 PyTorch 对接 | https://github.com/Dao-AILab/flash-attention |
+| **DeepGEMM**（DeepSeek 官方） | 面向 LLM 的 FP8 GEMM 等高性能 CUDA 实现与封装方式 | https://github.com/deepseek-ai/DeepGEMM |
+| **DeepSeek-V3**（官方模型/推理参考） | 公开模型代码中与 MoE、推理路径相关的模块布局（与具体算子需求交叉检索） | https://github.com/deepseek-ai/DeepSeek-V3 |
+
+**DeepSeek 组织入口**（按需下钻子仓库）：https://github.com/deepseek-ai  
+
+其他常作对照：**xFormers**（https://github.com/facebookresearch/xformers）、**LMDeploy**、**Megatron-LM**、各框架内置 `aten/src/ATen/native/cuda`。
 
 ## 按目标模型族检索（Qwen / DeepSeek）
 
 **默认目标模型族**为 **Qwen** 与 **DeepSeek** 推理栈。算子级别的关注点、MoE、量化与精度默认见 **[reference-target-models.md](reference-target-models.md)**。
 
-在 vLLM / TensorRT-LLM 中定位同类实现时，先查该文档 §4 关键词，再在仓库内搜索并写入设计中的 **具体路径或文件名**（路径随版本变化，以检出结果为准）：
+在 **vLLM / TensorRT-LLM / SGLang / FlashAttention / deepseek-ai 各子仓** 中定位同类实现时，先查 [reference-target-models.md](reference-target-models.md) §4 关键词，再在仓库内搜索并写入设计中的 **具体路径或文件名**（路径随版本变化，以检出结果为准）：
 
 | 模型族 | 优先对照仓库 | 说明 |
 |--------|--------------|------|
-| Qwen | vLLM、TensorRT-LLM、PyTorch `native/cuda` | Attention/RoPE/Norm/FFN 与量化路径 |
-| DeepSeek（含 MoE） | 同上 + 关键词 `moe` / `expert` / `router` / `grouped` | Dense 与 MoE 分组 GEMM、路由 |
+| Qwen | vLLM、TensorRT-LLM、**SGLang**、PyTorch `native/cuda`、**FlashAttention** | Attention/RoPE/Norm/FFN 与量化路径 |
+| DeepSeek（含 MoE） | 同上 + **deepseek-ai**（如 DeepSeek-V3、**DeepGEMM**）+ 关键词 `moe` / `expert` / `router` / `grouped` | 官方实现与社区栈交叉验证；分组 GEMM、路由、FP8 GEMM |
 
 ## 设计阶段要写下来
 
 - 本算子是否已被 **cuBLAS/CUTLASS/cuDNN** 覆盖？覆盖则设计 **API 选型 + workspace + stream + dtype**。
 - 若必须手写 kernel：一句话说明 **库无法覆盖的原因**（layout、融合方式、非标准归约等）。
-- 列出 **要对齐的参考路径**（例如 `vllm/...`、`tensorrt_llm/...` 下的具体子目录或文件名，便于 coder 检索）。
+- 列出 **要对齐的参考路径**（例如 `vllm/...`、`tensorrt_llm/...`、`sglang/...`、`flash-attention/...`、`DeepGEMM/...` 下的具体子目录或文件名，便于 coder 检索）。
 - 若目标为 **Qwen / DeepSeek**：在设计中交叉引用 [reference-target-models.md](reference-target-models.md) 中的算子条目与精度默认。

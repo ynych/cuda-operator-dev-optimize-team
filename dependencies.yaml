@@ -37,7 +37,7 @@ tools:
 
 # Ecosystem (pre-flight: user / repo may provide — not agent tools):
 # - Prefer linking CUTLASS, cuBLAS/cuBLASLt, cuDNN, CCCL/CUB when applicable
-# - Reference repos for patterns: vLLM, TensorRT-LLM (see reference-ecosystem.md)
+# - Reference repos for patterns: vLLM, TensorRT-LLM, SGLang, FlashAttention, deepseek-ai (e.g. DeepGEMM) — see reference-ecosystem.md
 # - Default target LLM families: Qwen, DeepSeek — see reference-target-models.md
 
 # Environment (not agent tools — Leader reports in Step 0):
