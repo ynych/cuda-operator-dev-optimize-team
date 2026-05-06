@@ -1,0 +1,44 @@
+# CUDA 多角色流水线 — 预检依赖（Leader Step 0）
+
+skills:
+  - name: cuda-kernel-design
+    source: local
+    required: false
+    purpose: Optional methodology pack for designer; role file embeds defaults when missing.
+
+  - name: cuda-kernel-code-gen
+    source: local
+    required: false
+    purpose: Optional codegen patterns; kernel-coder role suffices alone.
+
+  - name: cuda-kernel-code-review
+    source: local
+    required: false
+    purpose: Optional review rubric; adversary role embeds checklist when missing.
+
+  - name: cuda-kernel-precision-eval
+    source: local
+    required: false
+    purpose: Optional eval harness templates; validator role embeds requirements when missing.
+
+  - name: cuda-kernel-performance-optim
+    source: local
+    required: false
+    purpose: Optional NCU metric cheat sheet; optimizer role embeds workflow when missing.
+
+tools:
+  - name: bash
+    required: true
+    purpose: nvcc/cmake build, pytest drivers, nsys/ncu CLI when available.
+
+  - name: python
+    required: false
+    purpose: PyTorch/CuPy golden tests and harness; missing → precision stage may be manual or skipped with user consent.
+
+# Ecosystem (pre-flight: user / repo may provide — not agent tools):
+# - Prefer linking CUTLASS, cuBLAS/cuBLASLt, cuDNN, CCCL/CUB when applicable
+# - Reference repos for patterns: vLLM, TensorRT-LLM (see reference-ecosystem.md)
+
+# Environment (not agent tools — Leader reports in Step 0):
+# - CUDA Toolkit + driver on PATH (nvcc) for compile gate
+# - Physical GPU optional for run/profile; else RUNTIME-DEGRADED in Final Report
