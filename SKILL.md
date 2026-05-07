@@ -1,9 +1,12 @@
 ---
 name: cuda-operator-dev-optimize-team
 description: |
-  5-role C+A pipeline for CUDA ops: prefer CUTLASS, cuBLAS, cuDNN, CUB before raw kernels; cites vLLM, TensorRT-LLM, SGLang, FlashAttention, FlashInfer, Triton, Transformer Engine, Apex, AWQ/GPTQ/SmoothQuant, llm-compressor, CUDA Graph patterns, and deepseek-ai (e.g. DeepGEMM).
-  Default target workloads: Qwen and DeepSeek LLM serving (see reference-target-models.md). Use for end-to-end custom CUDA from spec to correct, profiled code. Not for trivial one-offs without QA gates.
-version: "0.2"
+  Team skill: CUDA custom operators and kernels — design, implement, adversarial review, golden precision, Nsight/NCU performance. Prefer CUTLASS, cuBLAS, cuDNN, CUB before raw __global__.
+  TRIGGER when user: writes or optimizes CUDA / CUDA kernel / custom op / extension / .cu; matrix transpose, GEMM, reduction, elementwise, fusion; gives shapes (M=, N=, batch) only; points to solution.cu or kernel path; provides Python/C++ reference for golden test; asks for nvcc build, profile, NCU, occupancy, coalescing.
+  触发词（中英）: CUDA、kernel、算子、矩阵转置、优化、手写、从零、solution.cu、ref、golden、精度、profile.
+  LLM stack references when relevant: vLLM, TensorRT-LLM, SGLang, FlashAttention, FlashInfer, Triton, Transformer Engine, quantization, DeepSeek, Qwen (see reference-ecosystem.md, reference-target-models.md).
+  Non-LLM kernels (e.g. transpose): use Target Model / Workload Alignment = generic/other in Stage 1; full gates still apply unless user explicitly opts out per bind.md.
+version: "0.2.1"
 kind: team-skill
 roles:
   - id: operator-designer
@@ -29,6 +32,21 @@ roles:
 ---
 
 # CUDA Operator Dev & Optimize Team
+
+## 如何触发（编排 / 用户话术）
+
+自动匹配主要依赖本文件 **YAML `description`** 中的英文/中文关键词。若未自动挂上本 skill，请用户 **显式点名** 或复制下面任一句（可改路径与 shape）：
+
+| 场景 | 示例（可直接改参数） |
+|------|----------------------|
+| 从零只有需求 | 「用 **cuda-operator-dev-optimize-team** 全流程：帮我写一个 **矩阵转置的 CUDA kernel** 并 **优化**。」 |
+| 只有 shape / 算子名 | 「用团队 skill **优化 matrix_transpose**，**M=6000，N=7000**。」 |
+| 已有 `.cu` | 「用 **cuda-operator-dev-optimize-team** **优化** `solution.cu` 里的 **matrix_transpose**，**M=6000，N=7000**。」 |
+| 实现 + reference | 「用团队 skill：**优化** `kernel/matrix_transpose/solution.cu`，**ref** 是 `kernel/matrix_transpose/transpose_ref.py`，**M=6000，N=7000**。」 |
+
+**Leader 注意**：非 Qwen/DeepSeek 类算子（如通用转置）在 Stage 1 的 **Target Model / Workload Alignment** 中填 **generic / other**，并简述 shape、dtype、无 MoE；其余门禁不变。
+
+---
 
 面向 **CUDA 自定义算子 / kernel** 的端到端流程：**5 个串行阶段 + Stage 3 对抗式代码审查门（C+A）**。CUDA 生态成熟，**默认「库与开源实现优先」**：在 **cuBLAS / cuBLASLt、CUTLASS、cuDNN、CUB（CCCL）** 等能覆盖的场景，设计应为 **封装与 launch/workspace**，而非从零写核心算子；**vLLM**、**TensorRT-LLM**、**SGLang**、**FlashAttention**、**FlashInfer**、**Triton / torch.compile（Inductor）**、**Transformer Engine**、**Apex**、**llm-compressor / AWQ / GPTQ / SmoothQuant**、**CUDA Graph** 与 **DeepSeek 官方开源**（如 DeepGEMM、DeepSeek-V3 等）等仓库或文档中的组织方式与融合实现应作为 **对照示例**（见 [reference-ecosystem.md](reference-ecosystem.md)）。**默认优化的目标模型族为 Qwen 与 DeepSeek 推理栈**（算子形状、MoE、量化与验收默认见 [reference-target-models.md](reference-target-models.md)）；其他模型族须在 Pre-flight 中声明。确需手写 `__global__` 时，再在设计中展开 **grid/block/tile、shared/reg、occupancy**，并用 **golden + Nsight** 闭环。
 

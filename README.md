@@ -28,10 +28,16 @@
 | [reference-target-models.md](reference-target-models.md) | **Qwen / DeepSeek** 算子关注点、MoE、量化与精度默认 |
 | [roles/](roles/) | 五角色：设计、编码、对抗、精度、性能 |
 
+## 如何触发本 Skill
+
+编排器多按 `SKILL.md` 里 **`description`** 关键词匹配。若 **未自动选中**，请用户句子里显式包含：**CUDA / kernel / 算子 / 优化 / matrix transpose / `.cu` / M= N= / ref / golden** 等，或直接写：**「使用 cuda-operator-dev-optimize-team 团队 skill」**。
+
+四类典型问法见 [SKILL.md](SKILL.md) 章节 **「如何触发（编排 / 用户话术）」**（从零、仅 shape、已有 solution、实现+ref）。
+
 ## 快速使用（编排侧）
 
 1. 将本目录作为 **team-skill** 加载（见 `SKILL.md`  frontmatter）。
-2. Leader **Step 0**：阅读 `dependencies.yaml`、`reference-ecosystem.md`、`reference-target-models.md`；确认目标是否为 Qwen / DeepSeek 或需切换模型族。
+2. Leader **Step 0**：阅读 `dependencies.yaml`、`reference-ecosystem.md`、`reference-target-models.md`；确认目标是否为 Qwen / DeepSeek **或 generic 算子**（如转置：Target Model 填 other/generic）。
 3. 按 `workflow.md` 串行派发五角色；子代理提示词使用各 `roles/*.md` 中的 **`## Inline Persona for Teammate`** 全文。
 
 ## 版本
